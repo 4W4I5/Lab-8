@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>Edit Student</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Edit Student</h1>
+        <form id="studentForm" action="/update/{{ student.SerialNo }}" method="post">
+            <input type="hidden" name="_csrf" value="{{ csrf_token }}" />
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="Fname">First Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="Fname"
+                      name="fname"
+                      required
+                      value="{{ student.Fname }}"
+                    />
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="Lname">Last Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="Lname"
+                      name="lname"
+                      required
+                      value="{{ student.Lname }}"
+                    />
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="email">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      required
+                      value="{{ student.Email }}"
+                    />
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="phone">Phone Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="phone"
+                      name="phone"
+                      value="{{ student.Phone }}"
+                    />
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="Password">Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      required
+                    />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Student</button>
+            <a href="/" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('studentForm').onsubmit = async function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(event.target);
+            const csrfToken = formData.get('_csrf'); // Get the CSRF token
+
+            console.log('CSRF Token:', csrfToken); // Debug log to check the token
+
+            if (!csrfToken) {
+                alert('CSRF token is missing.'); // Alert if the token is missing
+                return;
+            }
+
+            const response = await fetch(event.target.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': csrfToken, // Set the CSRF token in headers
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                window.location.href = '/'; // Redirect on success
+            } else {
+                // Handle error response
+                const errorData = await response.json();
+                alert(errorData.detail);
+            }
+        };
+    </script>
+</body>
+</html>

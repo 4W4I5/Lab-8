@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>Awais's Navbar</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="/">Student Records</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="/"
+              >Home <span class="sr-only">(current)</span></a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/Awais">About Awais</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Student Records</h1>
+      <form id="studentForm" action="/add_student" method="post" class="mb-4">
+        <input type="hidden" name="_csrf" value="{{ csrf_token }}" />
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label for="Fname">First Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="Fname"
+              name="fname"
+              required
+            />
+          </div>
+          <div class="form-group col-md-4">
+            <label for="Lname">Last Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="Lname"
+              name="lname"
+              required
+            />
+          </div>
+          <div class="form-group col-md-4">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+          <div class="form-group col-md-4">
+            <label for="phone">Phone Number</label>
+            <input type="tel" class="form-control" id="phone" name="phone" />
+          </div>
+          <div class="form-group col-md-4">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Student</button>
+      </form>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Serial No</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone Number</th>
+            <th scope="col">PasswordHash</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>{{ student.SerialNo }}</td>
+            <td>{{ student.Fname }}</td>
+            <td>{{ student.Lname }}</td>
+            <td>{{ student.Email }}</td>
+            <td>{{ student.Phone }}</td>
+            <td>{{ student.PasswordHash }}</td>
+            <td>
+              <form
+                id="deleteForm-{{ student.SerialNo }}"
+                style="display: inline"
+              >
+                <input type="hidden" name="_csrf" value="{{ csrf_token }}" />
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  onclick="deleteStudent('{{ student.SerialNo }}')"
+                >
+                  Delete
+                </button>
+              </form>
+              <a
+                href="/update/{{ student.SerialNo }}"
+                class="btn btn-warning btn-sm"
+                >Edit</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      document.getElementById("studentForm").onsubmit = async function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const formData = new FormData(event.target);
+        const csrfToken = formData.get("_csrf");
+
+        const response = await fetch("/add_student", {
+          method: "POST",
+          headers: {
+            "X-CSRF-Token": csrfToken, // Set the CSRF token in headers
+          },
+          body: formData,
+        });
+
+        if (response.ok) {
+          window.location.href = "/"; // Redirect on success
+        } else {
+          // Handle error response
+          const errorData = await response.json();
+          alert(errorData.detail);
+        }
+      };
+    </script>
+    <script>
+      async function deleteStudent(serialNo) {
+        const form = document.getElementById(`deleteForm-${serialNo}`);
+        const formData = new FormData(form);
+        const csrfToken = formData.get("_csrf");
+
+        const response = await fetch(`/delete_student/${serialNo}`, {
+          method: "POST",
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        });
+
+        if (response.ok) {
+          window.location.reload(); // Reload the page on success
+        } else {
+          const errorData = await response.json();
+          alert(errorData.detail); // Show error message
+        }
+      }
+    </script>
+  </body>
+</html>
